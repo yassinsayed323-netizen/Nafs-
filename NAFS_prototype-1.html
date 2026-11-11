@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NAFS | نَفْس</title>
+<style>
+:root{--ink:#18333a;--muted:#657b80;--teal:#167c78;--mint:#e7f5f1;--paper:#f6faf9;--line:#dce9e6}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink)}
+header{background:linear-gradient(135deg,#145d61,#238f83);color:white;padding:25px 20px 28px;border-radius:0 0 25px 25px}
+.brand{font-size:28px;font-weight:800;letter-spacing:.5px}.tag{opacity:.9;margin-top:5px;font-size:14px}
+main{max-width:620px;margin:auto;padding:17px}
+.search{display:flex;gap:8px;margin-top:-2px}input,select,textarea{font:inherit;border:1px solid var(--line);border-radius:12px;padding:12px;background:white;color:var(--ink);width:100%;outline-color:var(--teal)}
+.search input{flex:1}.tabs{display:flex;gap:8px;margin:17px 0;flex-wrap:wrap}
+button{border:0;border-radius:12px;padding:11px 15px;background:var(--teal);color:white;font:inherit;font-weight:650;cursor:pointer}
+.tab{background:white;color:var(--teal);border:1px solid var(--line)}.tab.active{background:var(--teal);color:white}
+h2{font-size:19px;margin:20px 0 12px}.card{background:white;border:1px solid var(--line);border-radius:17px;padding:15px;margin:11px 0;box-shadow:0 4px 14px #174b4a0a}
+.doctor{display:flex;gap:12px;align-items:center}.avatar{width:54px;height:54px;border-radius:16px;background:var(--mint);display:grid;place-items:center;font-size:25px}
+.name{font-weight:750}.sub{font-size:13px;color:var(--muted);margin-top:3px}.rating{color:#a56b00;font-weight:700;font-size:14px;margin-top:5px}
+.pill{display:inline-block;background:var(--mint);color:#17645f;border-radius:20px;padding:5px 9px;font-size:12px;margin:8px 4px 0 0}
+.actions{display:flex;gap:8px;margin-top:13px}.actions button{flex:1}.secondary{background:#edf5f3;color:#17645f}
+.panel{display:none}.panel.show{display:block}.field{margin:10px 0}.field label{display:block;font-size:13px;font-weight:650;margin-bottom:6px}
+.note{font-size:12px;line-height:1.7;color:var(--muted);background:#f0f6f5;padding:12px;border-radius:12px;margin-top:12px}
+.empty{text-align:center;color:var(--muted);padding:25px}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
+</style>
+</head>
+<body>
+<header><div class="brand">نَفْس <span style="font-size:16px;opacity:.9">| NAFS</span></div><div class="tag">دليل للعثور على مختصين في الصحة النفسية</div></header>
+<main>
+<div class="search"><input id="q" placeholder="ابحث بالاسم أو التخصص..." oninput="render()"><button onclick="render()">بحث</button></div>
+<div class="tabs">
+<button class="tab active" id="browseTab" onclick="show('browse')">استكشف المختصين</button>
+<button class="tab" id="registerTab" onclick="show('register')">طلب تسجيل مختص</button>
+</div>
+<section id="browse" class="panel show">
+<h2>مختصون تجريبيون</h2>
+<div class="note">هذه بيانات تجريبية لعرض شكل التطبيق فقط، وليست توصيات أو ملفات أطباء حقيقيين. لن يظهر أي مختص للعامة قبل مراجعة مؤهلاته والتحقق منها.</div>
+<div id="list"></div>
+</section>
+<section id="register" class="panel">
+<h2>طلب انضمام مختص</h2>
+<p class="sub">املأ البيانات لإرسال طلب مراجعة. لا ترفع مستندات شخصية في هذا النموذج التجريبي.</p>
+<form onsubmit="submitForm(event)">
+<div class="field"><label>الاسم الكامل</label><input required placeholder="اسم الطبيب أو الأخصائي"></div>
+<div class="field"><label>التخصص</label><select required><option value="">اختر التخصص</option><option>طب نفسي</option><option>علم نفس إكلينيكي</option><option>علاج نفسي</option><option>إرشاد أسري</option></select></div>
+<div class="field"><label>المؤهل المهني والجهة المانحة</label><input required placeholder="اكتب المؤهل باختصار"></div>
+<div class="field"><label>البريد الإلكتروني المهني</label><input type="email" required placeholder="name@example.com"></div>
+<div class="field"><label>نبذة مهنية</label><textarea rows="3" placeholder="الخبرة ومجالات العمل"></textarea></div>
+<button type="submit" style="width:100%">إرسال طلب المراجعة</button>
+</form>
+<div id="msg" class="note" style="display:none"></div>
+<div class="note">مهم: هذه نسخة أولية لا ترسل البيانات إلى خادم ولا تحفظها. قبل النشر الفعلي يجب إضافة نظام آمن للتحقق من الترخيص، وحماية البيانات، وموافقة واضحة على سياسة الخصوصية.</div>
+</section>
+</main>
+<footer>NAFS © نموذج أولي تجريبي</footer>
+<script>
+const doctors=[
+ {name:"د. سارة أحمد",spec:"طب نفسي",city:"الإسكندرية",rating:4.8,count:26,emoji:"👩‍⚕️"},
+ {name:"أ. كريم محمود",spec:"علم نفس إكلينيكي",city:"القاهرة",rating:4.6,count:18,emoji:"🧑‍⚕️"},
+ {name:"د. منى عادل",spec:"طب نفسي",city:"الجيزة",rating:4.9,count:34,emoji:"👩‍⚕️"},
+ {name:"د. سلام تريه",spec:"التخصص غير محدد",city:"غير محدد",rating:0,count:0,emoji:"👩‍⚕️"}
+];
+function render(){
+ const q=document.getElementById('q').value.trim().toLowerCase();
+ const found=doctors.filter(d=>(d.name+d.spec+d.city).toLowerCase().includes(q));
+ document.getElementById('list').innerHTML=found.length?found.map((d,i)=>`
+ <article class="card"><div class="doctor"><div class="avatar">${d.emoji}</div><div><div class="name">${d.name}</div><div class="sub">${d.spec} • ${d.city}</div><div class="rating">★ ${d.rating} <span class="sub">(${d.count} تقييمًا تجريبيًا)</span></div></div></div>
+ <span class="pill">بيانات توضيحية</span><div class="actions"><button class="secondary" onclick="rate(${i})">قيّم الملف تجريبيًا</button><button onclick="alert('الحجز غير متاح في النسخة التجريبية.')">التفاصيل</button></div></article>`).join(''):'<div class="empty">لا توجد نتائج مطابقة.</div>';
+}
+function rate(i){alert('التقييمات في هذه النسخة للعرض فقط. يلزم تسجيل دخول ومنع التقييمات الوهمية قبل إطلاقها.')}
+function show(which){
+ document.querySelectorAll('.panel').forEach(p=>p.classList.remove('show'));
+ document.getElementById(which).classList.add('show');
+ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+ document.getElementById(which+'Tab').classList.add('active');
+}
+function submitForm(e){e.preventDefault();const m=document.getElementById('msg');m.style.display='block';m.textContent='تم اختبار النموذج بنجاح. هذه نسخة تجريبية ولا يتم إرسال البيانات أو حفظها.';e.target.reset();}
+render();
+</script>
+</body>
+</html>
